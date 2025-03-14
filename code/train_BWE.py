@@ -276,7 +276,7 @@ class BWEModel(pl.LightningModule):
         # self.log("lr", str(optimizer_g.param_groups[0]['lr']), on_epoch=True, on_step=True, prog_bar=True)
 
     @torch.no_grad()
-    def _validation_epoch(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx):
 
         # generator
         loss, loss_wav, loss_stft, loss_adv, loss_feat, enhanced, clean,= self.forward(batch)
