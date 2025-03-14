@@ -1,1 +1,1 @@
-to train, run 'train_BWE.py'
+to train, run `train_BWE.py`
