@@ -1,0 +1,57 @@
+[bwe_config]
+input_size=769
+dec_dim=64
+norm='weight_norm'
+
+[DDP]
+world_size = 1
+device = "0"
+
+[scheduler]
+
+[loss]
+
+[FFT]
+fs = 48000
+fft_len = 1536
+hop_len = 480
+win_len = 1536
+low_fs = 16000
+
+[train_dataset]
+dataset_dir = "/data/ssd1/xinan.chen/VCTK/VCTK_wav_48k_bae/train"
+wav_len = 2
+num_per_epoch = 8000
+random_start = true
+mode = "train"
+
+[train_dataloader]
+batch_size = 6
+num_workers = 3
+drop_last = true
+pin_memory = true
+
+[validation_dataset]
+dataset_dir = "/data/ssd1/xinan.chen/VCTK/VCTK_wav_48k_bae/test"
+wav_len = 2
+sample_per_epoch = false
+random_start = false
+mode = "validation"
+
+[validation_dataloader]
+batch_size = 12
+num_workers = 3
+pin_memory = true
+
+[trainer]
+max_epochs = 200
+clip_grad_norm_value = 3.0
+exp_path = "/data/ssd1/xinan.chen/exp/bwe/BAElnew2-16-48"
+resume = false
+resume_datetime = "2025-03-12-16h58m"
+
+[coeff]
+lamda = 1
+lamda_f = 0.1
+lamda_g = 1
+lamda_s = 10
