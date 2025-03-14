@@ -62,7 +62,15 @@ def run(config, args):
     optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-4, betas=(0.8, 0.99))
     optimizer_d = torch.optim.Adam(params=model_d.parameters(), lr=5e-5, betas=(0.8, 0.99))
 
-    exp_path = config['trainer']['exp_path'] + '_' + datetime.now().strftime("%Y-%m-%d-%Hh%Mm")
+    trainer_config = config['trainer']
+    resume = trainer_config['resume']
+    if not resume:
+        exp_path = trainer_config['exp_path'] + '_' + datetime.now().strftime("%Y-%m-%d-%Hh%Mm")
+
+    else:
+        exp_path = trainer_config['exp_path'] + '_' + trainer_config['resume_datetime']
+        if not os.path.exists(exp_path):
+            raise FileNotFoundError('The specified experiment path does not exist.')
     log_path = os.path.join(exp_path, 'logs')
     checkpoint_path = os.path.join(exp_path, 'checkpoints')
     # sample_path = os.path.join(exp_path, 'val_samples')
@@ -92,7 +100,8 @@ def run(config, args):
     
     trainer = pl.Trainer(
         max_epochs=config['trainer']['max_epochs'],
-        logger=pl.loggers.TensorBoardLogger(log_path, name=''),
+        logger=pl.loggers.TensorBoardLogger(log_path, name='version_0'),
+        check_val_every_n_epoch=1,
         callbacks=[
             pl.callbacks.ModelCheckpoint(dirpath = checkpoint_path,
                                          filename='model_{epoch}',
@@ -101,15 +110,15 @@ def run(config, args):
                                          save_top_k=1, 
                                          mode='min'),
             LearningRateMonitor(logging_interval='step'),
-            RichProgressBar(leave=True),
+            RichProgressBar(leave=False),
             NaNMonitor(checkpoint_path)
         ],
     )
-    if config['trainer']['resume']:
-        latest_checkpoint = sorted(glob(os.path.join(checkpoint_path, 'model_*.tar')))[-1]
+    if resume:
+        # latest_checkpoint = sorted(glob(os.path.join(checkpoint_path, 'model_*.tar')))[-1]
         trainer.fit(
             BWEmodel,
-            ckpt_path=latest_checkpoint,
+            ckpt_path=os.path.join(checkpoint_path, 'last.ckpt'),
         )
     else:
         trainer.fit(BWEmodel)
